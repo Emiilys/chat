@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        #chat-container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        } 
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        #messages{
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        #messages > li{
+            padding: 0.5rem 1rem;
+        }
+        #messages{
+          bacground: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <ul id="messages"></ul>
+     <li>Texto</li>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+    <div id="chat-container">
+        <h1>Chat</h1>
+        <input type="text" id="username" placeholder="Digite seu nome" />
+        <input type="text" id="room" placeholder="Digite o nome da sala" />
+        <button id="join-room">Entrar na sala</button>
+        <div id="messages"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        document.getElementById('join-room').onclick = () => {
+            const username = document.getElementById('username').value;
+            const room = document.getElementById('room').value;
+
+            if (username && room) {
+                socket.emit('joinRoom', { username, room });
+                document.getElementById('messages').innerHTML += `<p>${username} entrou na sala ${room}</p>`;
+            } else {
+                alert('Por favor, preencha seu nome e o nome da sala.');
+            }
+
+
+        };
+    </script>
+</body>
+</html>
