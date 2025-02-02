@@ -25,6 +25,10 @@ class App {
     listenSocket() {
         this.io.on('connection', (socket) => {
             console.log('user connected =>', socket.id);
+        
+        socket.on('message',(msg)=> {
+        this.io.emit('message', (msg));
+        });
         });
     }
 

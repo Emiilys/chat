@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,66 +10,135 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f4;
+            background: linear-gradient(to bottom, #ffccff, #ffffff); /* Degradê rosa para branco */
         }
+
         #chat-container {
-            max-width: 600px;
+            max-width: 800px; /* Aumentando a largura do container */
             margin: auto;
             background: white;
             padding: 20px;
-            border-radius: 5px;
+            border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        } 
-        input, button {
-            padding: 10px;
-            margin: 5px 0;
-            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 80vh; /* Altura do container do chat */
+            overflow: hidden; /* Esconde o overflow */
         }
 
-        #messages{
+        #messages {
             list-style-type: none;
             margin: 0;
             padding: 0;
+            flex-grow: 1; /* Permite que a lista de mensagens cresça */
+            overflow-y: auto; /* Adiciona rolagem vertical */
         }
-        #messages > li{
-            padding: 0.5rem 1rem;
+
+        #messages>li {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 10px;
+            color: white;
+            max-width: 80%; /* Limita a largura dos balões */
         }
-        #messages{
-          bacground: #f4f4f4;
+
+        /* Estilos para balões de mensagens */
+        .message-user {
+            align-self: flex-end; /* Alinha à direita */
+        }
+
+        .message-other {
+            align-self: flex-start; /* Alinha à esquerda */
+        }
+
+        #input-container {
+            display: flex;
+            background-color: #ff99cc; /* Painel de entrada em rosa mais escuro */
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        input {
+            flex-grow: 1; /* Faz o input ocupar o espaço disponível */
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-size: 16px;
+            color: #555; /* Cor do texto */
+        }
+
+        input::placeholder {
+            color: #aaa; /* Cor do placeholder */
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #ff66b2; /* Cor do botão */
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff3385; /* Cor do botão ao passar o mouse */
         }
     </style>
 </head>
+
 <body>
-    <ul id="messages"></ul>
-     <li>Texto</li>
-    <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
     <div id="chat-container">
-        <h1>Chat</h1>
-        <input type="text" id="username" placeholder="Digite seu nome" />
-        <input type="text" id="room" placeholder="Digite o nome da sala" />
-        <button id="join-room">Entrar na sala</button>
-        <div id="messages"></div>
+        <ul id="messages"></ul>
+        <div id="input-container">
+            <input id="input" autocomplete="off" placeholder="Digite sua mensagem..." />
+            <button>Enviar</button>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+        const messageList = document.getElementById('messages');
+        const input = document.getElementById('input');
 
-        document.getElementById('join-room').onclick = () => {
-            const username = document.getElementById('username').value;
-            const room = document.getElementById('room').value;
+        // Função para gerar uma cor aleatória
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
 
-            if (username && room) {
-                socket.emit('joinRoom', { username, room });
-                document.getElementById('messages').innerHTML += `<p>${username} entrou na sala ${room}</p>`;
+        document.querySelector('button').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('message', `Você: ${input.value}`); // Prefixando com "Você:"
+                input.value = '';
+            }
+        });
+
+        socket.on('message', (msg) => {
+            const li = document.createElement('li');
+            li.textContent = msg;
+
+            // Adiciona uma classe para diferenciar mensagens do usuário e de outros
+            if (msg.startsWith('Você:')) {
+                li.classList.add('message-user');
             } else {
-                alert('Por favor, preencha seu nome e o nome da sala.');
+                li.classList.add('message-other');
             }
 
+            // Define uma cor aleatória para o balão de mensagem
+            //lembrar de arrumar isso para manter uma cor pra cada usuario 
+            li.style.backgroundColor = getRandomColor();
 
-        };
+            messageList.appendChild(li);
+            messageList.scrollTop = messageList.scrollHeight; // Rolagem automática para a última mensagem
+        });
     </script>
 </body>
+
 </html>
