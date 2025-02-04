@@ -1,144 +1,240 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
+    <script src="/socket.io/socket.io.js"></script> <!-- Conecta o cliente ao servidor via Socket.IO -->
     <style>
+        /* Estilos gerais */
         body {
             font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(to bottom, #ffccff, #ffffff); /* Degradê rosa para branco */
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 20px;
         }
 
+        /* Estilo da lista de salas */
+        .room-selection {
+            margin: 20px 0;
+        }
+        #room-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #room-list li {
+            background-color: #fff;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #room-list li:hover {
+            background-color: #ddd;
+        }
+
+        /* Chat container */
         #chat-container {
-            max-width: 800px; /* Aumentando a largura do container */
+            display: none; /* Inicialmente oculto */
+            max-width: 800px;
             margin: auto;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
             flex-direction: column;
-            height: 80vh; /* Altura do container do chat */
-            overflow: hidden; /* Esconde o overflow */
+            height: 80vh;
+            overflow: hidden;
         }
-
+        #room-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
         #messages {
             list-style-type: none;
             margin: 0;
             padding: 0;
-            flex-grow: 1; /* Permite que a lista de mensagens cresça */
-            overflow-y: auto; /* Adiciona rolagem vertical */
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 60vh;
         }
-
         #messages>li {
             padding: 10px;
             margin: 5px 0;
             border-radius: 10px;
             color: white;
-            max-width: 80%; /* Limita a largura dos balões */
+            max-width: 80%;
+            word-wrap: break-word;
         }
-
-        /* Estilos para balões de mensagens */
         .message-user {
-            align-self: flex-end; /* Alinha à direita */
+            align-self: flex-end;
+            background-color: #ff66b2;
         }
-
         .message-other {
-            align-self: flex-start; /* Alinha à esquerda */
+            align-self: flex-start;
+            background-color: #4CAF50;
         }
 
+        /* Input de mensagem */
         #input-container {
             display: flex;
-            background-color: #ff99cc; /* Painel de entrada em rosa mais escuro */
+            background-color: #ff99cc;
             padding: 10px;
             border-radius: 10px;
         }
-
         input {
-            flex-grow: 1; /* Faz o input ocupar o espaço disponível */
+            flex-grow: 1;
             padding: 10px;
             border: none;
             border-radius: 5px;
             margin-right: 10px;
             font-size: 16px;
-            color: #555; /* Cor do texto */
+            color: #555;
         }
-
-        input::placeholder {
-            color: #aaa; /* Cor do placeholder */
-        }
-
         button {
             padding: 10px 15px;
-            background-color: #ff66b2; /* Cor do botão */
+            background-color: #ff66b2;
             border: none;
             border-radius: 5px;
             color: white;
             cursor: pointer;
         }
-
         button:hover {
-            background-color: #ff3385; /* Cor do botão ao passar o mouse */
+            background-color: #ff3385;
+        }
+
+        /* Estilos para o formulário de nome */
+        #name-form {
+            margin-bottom: 20px;
+        }
+        #name-form input {
+            margin-right: 10px;
         }
     </style>
 </head>
-
 <body>
-    <div id="chat-container">
-        <ul id="messages"></ul>
-        <div id="input-container">
-            <input id="input" autocomplete="off" placeholder="Digite sua mensagem..." />
-            <button>Enviar</button>
+    <div class="container">
+        <h1>Bem-vindo ao Chat</h1>
+
+        <!-- Tela de Definir Nome -->
+        <div id="name-form">
+            <h2>Defina seu nome</h2>
+            <input type="text" id="user-name" placeholder="Digite seu nome">
+            <button id="set-name">Salvar Nome</button>
+        </div>
+
+        <!-- Tela de Seleção de Sala -->
+        <div class="room-selection" id="room-selection" style="display: none;">
+            <h2>Escolha uma sala</h2>
+            <ul id="room-list"></ul>
+            <button id="create-room">Criar Nova Sala</button>
+        </div>
+
+        <!-- Tela de Chat -->
+        <div id="chat-container">
+            <h2 id="room-title"></h2>
+            <ul id="messages"></ul>
+            <div id="input-container">
+                <input id="input" autocomplete="off" placeholder="Digite sua mensagem..." />
+                <button id="send-button">Enviar</button>
+            </div>
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
-        const messageList = document.getElementById('messages');
-        const input = document.getElementById('input');
+        const socket = io();  // Conectar ao servidor
+        const roomSelection = document.getElementById('room-selection');  // Elemento que mostra a lista de salas
+        const chatContainer = document.getElementById('chat-container');  // Container onde o chat vai ocorrer
+        const roomList = document.getElementById('room-list');  // Lista de salas
+        const createRoomButton = document.getElementById('create-room');  // Botão para criar nova sala
+        const sendButton = document.getElementById('send-button');  // Botão para enviar mensagem
+        const messageList = document.getElementById('messages');  // Onde as mensagens serão listadas
+        const input = document.getElementById('input');  // Campo de input para novas mensagens
+        const roomTitle = document.getElementById('room-title');  // Título da sala no chat
+        const nameForm = document.getElementById('name-form');  // Formulário de nome do usuário
+        const setNameButton = document.getElementById('set-name');  // Botão para salvar o nome
+        const userNameInput = document.getElementById('user-name');  // Campo de input de nome do usuário
 
-        // Função para gerar uma cor aleatória
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
+        let currentRoom = "";  // Armazena o nome da sala atual
+        let userName = "";  // Variável para armazenar o nome do usuário
 
-        document.querySelector('button').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (input.value) {
-                socket.emit('message', `Você: ${input.value}`); // Prefixando com "Você:"
-                input.value = '';
+        // Definir nome do usuário
+        setNameButton.addEventListener('click', function() {
+            const name = userNameInput.value.trim();  // Pega o nome digitado
+            if (name) {
+                userName = name;
+                socket.emit('setUsername', { username: userName });  // Envia o nome para o servidor
+                nameForm.style.display = 'none';  // Esconde a tela de definição de nome
+                roomSelection.style.display = 'block';  // Exibe a tela de seleção de salas
+            } else {
+                alert("Por favor, insira um nome.");
             }
         });
 
-        socket.on('message', (msg) => {
-            const li = document.createElement('li');
-            li.textContent = msg;
-
-            // Adiciona uma classe para diferenciar mensagens do usuário e de outros
-            if (msg.startsWith('Você:')) {
-                li.classList.add('message-user');
-            } else {
-                li.classList.add('message-other');
+        // Criar uma nova sala
+        createRoomButton.addEventListener('click', function() {
+            const roomName = prompt("Digite o nome da nova sala:");  // Pede o nome da nova sala
+            if (roomName) {
+                addRoomToList(roomName);  // Adiciona a nova sala à lista
+                socket.emit('createRoom', roomName);  // Envia o nome da sala para o servidor
             }
+        });
 
-            // Define uma cor aleatória para o balão de mensagem
-            //lembrar de arrumar isso para manter uma cor pra cada usuario 
-            li.style.backgroundColor = getRandomColor();
+        // Adicionar uma sala à lista
+        function addRoomToList(roomName) {
+            const newRoom = document.createElement('li');
+            newRoom.textContent = roomName;  // Define o nome da sala na lista
+            newRoom.addEventListener('click', function() {
+                joinRoom(roomName);  // Ao clicar na sala, chama a função para entrar nela
+            });
+            roomList.appendChild(newRoom);  // Adiciona a nova sala à lista de salas
+        }
 
-            messageList.appendChild(li);
-            messageList.scrollTop = messageList.scrollHeight; // Rolagem automática para a última mensagem
+        // Entrar em uma sala
+        function joinRoom(roomName) {
+            currentRoom = roomName;  // Armazena o nome da sala atual
+            roomTitle.textContent = `Chat - ${roomName}`;  // Exibe o nome da sala no título
+            roomSelection.style.display = 'none';  // Esconde a tela de seleção de salas
+            chatContainer.style.display = 'flex';  // Exibe o container de chat
+
+            socket.emit('joinRoom', roomName);  // Informa ao servidor que entrou na sala
+
+            messageList.innerHTML = '';  // Limpa as mensagens anteriores
+        }
+
+        // Enviar mensagem
+        sendButton.addEventListener('click', function() {
+            const messageText = input.value;  // Pega o texto da mensagem
+            if (messageText) {
+                socket.emit('message', { room: currentRoom, text: messageText, sender: userName });  // Envia a mensagem para o servidor
+                input.value = '';  // Limpa o campo de input
+            }
+        });
+
+        // Receber mensagem
+        socket.on('message', function({ room, text, sender }) {
+            if (room === currentRoom) {  // Se a mensagem for da sala atual
+                const messageItem = document.createElement('li');
+                messageItem.className = sender === userName ? 'message-user' : 'message-other';  // Define o estilo da mensagem
+                messageItem.innerHTML = `<strong>${sender}:</strong> ${text}`;  // Exibe a mensagem com o nome do remetente
+                messageList.appendChild(messageItem);  // Adiciona a mensagem ao chat
+            }
+        });
+
+        // Atualizar lista de salas
+        socket.on('updateRooms', function(rooms) {
+            roomList.innerHTML = '';  // Limpa a lista de salas
+            rooms.forEach(addRoomToList);  // Adiciona todas as salas à lista
         });
     </script>
 </body>
-
 </html>
