@@ -19,7 +19,7 @@ let username = "";  // Variável para armazenar o nome do usuário
 
 // Espera o DOM ser carregado completamente antes de adicionar eventos
 document.addEventListener("DOMContentLoaded", () => {
-    
+
     // Evento para definir o nome do usuário
     usernameButton.addEventListener('click', () => {
         const name = usernameInput.value.trim();  // Pega o nome inserido
@@ -61,6 +61,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = prompt("Digite a senha para entrar na sala:");  // Solicita a senha da sala
         socket.emit('joinRoom', { roomName, password });  // Envia o nome da sala e a senha para o servidor
     }
+
+    const leaveRoomButton = document.getElementById('leave-room');  // Botão de sair
+
+    // Evento para o botão de sair
+    leaveRoomButton.addEventListener('click', function () {
+        if (currentRoom) {
+            socket.emit('leaveRoom', currentRoom);  // Emite o evento para o servidor
+            console.log(`Saindo da sala: ${currentRoom}`);
+            chatContainer.style.display = 'none';  // Esconde a tela de chat
+            roomSelection.style.display = 'block';  // Exibe a tela de seleção de salas
+        }
+    });
 
     // Evento para enviar mensagem
     sendButton.addEventListener('click', () => {
