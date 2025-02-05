@@ -202,7 +202,7 @@
             <h2>Escolha uma sala</h2>
             <ul id="room-list"></ul>
             <button id="create-room">Criar Nova Sala</button>
-            <button id="leave-room">Sair</button> 
+            <button id="leave-room">Sair</button>
         </div>
 
         <!-- Tela de Chat -->
@@ -217,7 +217,7 @@
         </div>
     </div>
 
-    <script>
+    <script> //chat em tempo real//
         const socket = io();  // Conectar ao servidor
         const roomSelection = document.getElementById('room-selection');  // Elemento que mostra a lista de salas
         const chatContainer = document.getElementById('chat-container');  // Container onde o chat vai ocorrer
@@ -241,7 +241,7 @@
             if (name) {
                 userName = name;
                 socket.emit('setUsername', { username: userName });  // Envia o nome para o servidor
-                nameForm.style.display = 'none';  
+                nameForm.style.display = 'none';
                 roomSelection.style.display = 'block';  // Exibe a tela de seleção de salas
             } else {
                 alert("Por favor, insira um nome.");
@@ -262,7 +262,7 @@
             const newRoom = document.createElement('li');
             newRoom.textContent = roomName;  // Define o nome da sala na lista
             newRoom.addEventListener('click', function () {
-                joinRoom(roomName);  
+                joinRoom(roomName);
             });
             roomList.appendChild(newRoom);  // Adiciona a nova sala à lista de salas
         }
@@ -309,6 +309,8 @@
             chatContainer.style.display = 'none';  // Esconde a tela de chat
             roomSelection.style.display = 'block';  // Exibe a tela de seleção de salas
         });
+
+     
     </script>
 </body>
 
