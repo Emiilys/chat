@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,57 +9,88 @@
     <style>
         /* Estilos gerais */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: cursive;
             margin: 0;
-            padding: 0;
+            padding: 0px;
+            background-color: #f6f1e7;
+            /* Cor de fundo rosa claro */
         }
+
         .container {
             width: 80%;
             margin: auto;
             text-align: center;
         }
+
         h1 {
+            margin-top: 20px;
+            text-align: center;
+            /* Centraliza o título */
+        }
+
+        /* Tela de Definir Nome */
+        #name-form {
+            background-color: #ff97cb;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 400px;
+        }
+
+        /* Tela de Seleção de Sala */
+        .room-selection {
+            display: none;
+            /* Inicialmente oculto */
+            background-color: #88f68b;
+            /* Verde claro */
+            padding: 20px;
+            border-radius: 10px;
             margin-top: 20px;
         }
 
-        /* Estilo da lista de salas */
-        .room-selection {
-            margin: 20px 0;
-        }
+        /* Listagem das salas */
         #room-list {
             list-style-type: none;
             padding: 0;
         }
+
         #room-list li {
-            background-color: #fff;
+            background-color: #d9fdd9;
             margin: 10px 0;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #84c084;
             border-radius: 5px;
             cursor: pointer;
         }
+
         #room-list li:hover {
-            background-color: #ddd;
+            background-color: #bfe0bf;
         }
 
-        /* Chat container */
+        /* Caixinha de Chat */
         #chat-container {
-            display: none; /* Inicialmente oculto */
+            display: none;
+            /* Inicialmente oculto */
             max-width: 800px;
             margin: auto;
-            background: white;
+            background: #e0b3ff;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             flex-direction: column;
             height: 80vh;
             overflow: hidden;
+            margin-top: 20px;
         }
+
         #room-title {
-            font-size: 1.2em;
+            font-size: 1.5em;
+            /* Tamanho maior para o título da sala */
             margin-bottom: 10px;
+            text-align: center;
+            /* Centraliza o título da sala */
         }
+
         #messages {
             list-style-type: none;
             margin: 0;
@@ -66,7 +98,9 @@
             flex-grow: 1;
             overflow-y: auto;
             max-height: 60vh;
+            /* Altura máxima para a lista de mensagens */
         }
+
         #messages>li {
             padding: 10px;
             margin: 5px 0;
@@ -75,22 +109,28 @@
             max-width: 80%;
             word-wrap: break-word;
         }
+
         .message-user {
             align-self: flex-end;
-            background-color: #ff66b2;
+            background-color: #ff97cb;
+            /* Cor da mensagem do usuário */
         }
+
         .message-other {
             align-self: flex-start;
-            background-color: #4CAF50;
+            background-color: #88f68b;
+            /* Cor da mensagem de outros usuários */
         }
 
         /* Input de mensagem */
         #input-container {
             display: flex;
-            background-color: #ff99cc;
+            background-color: #b78dd3;
+            /* Cor de fundo do input */
             padding: 10px;
             border-radius: 10px;
         }
+
         input {
             flex-grow: 1;
             padding: 10px;
@@ -100,30 +140,55 @@
             font-size: 16px;
             color: #555;
         }
+
         button {
             padding: 10px 15px;
-            background-color: #ff66b2;
+            background-color: whitesmoke;
+            /* Cor neutra para o botão */
             border: none;
             border-radius: 5px;
-            color: white;
+            color: rgb(42, 42, 42);
             cursor: pointer;
         }
+
         button:hover {
-            background-color: #ff3385;
+            background-color: rgb(210, 208, 208);
+            /* Cor do botão ao passar o mouse */
         }
 
         /* Estilos para o formulário de nome */
         #name-form {
             margin-bottom: 20px;
         }
+
         #name-form input {
             margin-right: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            /* Borda leve para o campo de entrada */
+        }
+
+        #save-name-button {
+            margin-top: 10px;
+            /* Espaço acima do botão */
+        }
+
+        /* Botão de Voltar */
+        #back-button {
+            margin-top: 20px;
+            /* Espaço acima do botão de voltar */
+            background-color: #b78dd3;
+            /* Cor neutra para o botão de voltar */
+            color: rg;
         }
     </style>
 </head>
+
 <body>
+
     <div class="container">
-        <h1>Bem-vindo ao Chat</h1>
+        <h1>Bem-vindo ao Chat 💬</h1>
 
         <!-- Tela de Definir Nome -->
         <div id="name-form">
@@ -133,7 +198,7 @@
         </div>
 
         <!-- Tela de Seleção de Sala -->
-        <div class="room-selection" id="room-selection" style="display: none;">
+        <div class="room-selection" id="room-selection">
             <h2>Escolha uma sala</h2>
             <ul id="room-list"></ul>
             <button id="create-room">Criar Nova Sala</button>
@@ -147,6 +212,7 @@
                 <input id="input" autocomplete="off" placeholder="Digite sua mensagem..." />
                 <button id="send-button">Enviar</button>
             </div>
+            <button id="back-button">Voltar para Salas</button> <!-- Botão de voltar -->
         </div>
     </div>
 
@@ -163,17 +229,18 @@
         const nameForm = document.getElementById('name-form');  // Formulário de nome do usuário
         const setNameButton = document.getElementById('set-name');  // Botão para salvar o nome
         const userNameInput = document.getElementById('user-name');  // Campo de input de nome do usuário
+        const backButton = document.getElementById('back-button');  // Botão de voltar
 
         let currentRoom = "";  // Armazena o nome da sala atual
         let userName = "";  // Variável para armazenar o nome do usuário
 
         // Definir nome do usuário
-        setNameButton.addEventListener('click', function() {
+        setNameButton.addEventListener('click', function () {
             const name = userNameInput.value.trim();  // Pega o nome digitado
             if (name) {
                 userName = name;
                 socket.emit('setUsername', { username: userName });  // Envia o nome para o servidor
-                nameForm.style.display = 'none';  // Esconde a tela de definição de nome
+                nameForm.style.display = 'none';  
                 roomSelection.style.display = 'block';  // Exibe a tela de seleção de salas
             } else {
                 alert("Por favor, insira um nome.");
@@ -181,7 +248,7 @@
         });
 
         // Criar uma nova sala
-        createRoomButton.addEventListener('click', function() {
+        createRoomButton.addEventListener('click', function () {
             const roomName = prompt("Digite o nome da nova sala:");  // Pede o nome da nova sala
             if (roomName) {
                 addRoomToList(roomName);  // Adiciona a nova sala à lista
@@ -193,8 +260,8 @@
         function addRoomToList(roomName) {
             const newRoom = document.createElement('li');
             newRoom.textContent = roomName;  // Define o nome da sala na lista
-            newRoom.addEventListener('click', function() {
-                joinRoom(roomName);  // Ao clicar na sala, chama a função para entrar nela
+            newRoom.addEventListener('click', function () {
+                joinRoom(roomName);  
             });
             roomList.appendChild(newRoom);  // Adiciona a nova sala à lista de salas
         }
@@ -212,7 +279,7 @@
         }
 
         // Enviar mensagem
-        sendButton.addEventListener('click', function() {
+        sendButton.addEventListener('click', function () {
             const messageText = input.value;  // Pega o texto da mensagem
             if (messageText) {
                 socket.emit('message', { room: currentRoom, text: messageText, sender: userName });  // Envia a mensagem para o servidor
@@ -221,7 +288,7 @@
         });
 
         // Receber mensagem
-        socket.on('message', function({ room, text, sender }) {
+        socket.on('message', function ({ room, text, sender }) {
             if (room === currentRoom) {  // Se a mensagem for da sala atual
                 const messageItem = document.createElement('li');
                 messageItem.className = sender === userName ? 'message-user' : 'message-other';  // Define o estilo da mensagem
@@ -231,10 +298,17 @@
         });
 
         // Atualizar lista de salas
-        socket.on('updateRooms', function(rooms) {
+        socket.on('updateRooms', function (rooms) {
             roomList.innerHTML = '';  // Limpa a lista de salas
             rooms.forEach(addRoomToList);  // Adiciona todas as salas à lista
         });
+
+        // Voltar para a tela de seleção de salas
+        backButton.addEventListener('click', function () {
+            chatContainer.style.display = 'none';  // Esconde a tela de chat
+            roomSelection.style.display = 'block';  // Exibe a tela de seleção de salas
+        });
     </script>
 </body>
+
 </html>

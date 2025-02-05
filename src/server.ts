@@ -4,16 +4,15 @@ import http from 'http'; // Importando o módulo HTTP do Node.js para criar o se
 import { Server } from 'socket.io'; // Importando o Socket.IO para comunicação em tempo real
 import path from 'path'; // Importando o módulo Path para manipulação de caminhos de arquivos
 
-// Caminho para o diretório raiz
 const __dirname = path.resolve();
 
 class App {
-    // Declarando variáveis que representam a aplicação, servidor, Socket.IO, salas e usuários
-    private app: Application; // Instância da aplicação Express
-    private http: http.Server; // Instância do servidor HTTP
-    private io: Server; // Instância do servidor Socket.IO
-    private rooms: Set<string> = new Set(); // Armazena o nome das salas criadas
-    private users: Map<string, string> = new Map(); // Mapeia os nomes dos usuários pelas salas
+   
+    private app: Application; 
+    private http: http.Server; 
+    private io: Server; 
+    private rooms: Set<string> = new Set(); 
+    private users: Map<string, string> = new Map(); 
 
     constructor() {
         // Inicializando a aplicação Express e o servidor HTTP
@@ -35,7 +34,10 @@ class App {
     listenSocket() {
         // Escutando quando um novo usuário se conecta
         this.io.on('connection', (socket) => {
-            console.log(`Usuário conectado: ${socket.id}`); // Exibe no console a conexão do usuário
+            console.log(`Usuário conectado: ${socket.id}`); 
+
+            // Enviar a lista de salas existentes para o novo usuário
+            socket.emit('updateRooms', Array.from(this.rooms)); // Envia a lista de salas para o novo usuário
 
             // Evento para criar uma nova sala
             socket.on('createRoom', (room) => {
@@ -45,7 +47,7 @@ class App {
 
             // Evento para o usuário entrar em uma sala
             socket.on('joinRoom', (room) => {
-                socket.join(room); // Faz o usuário entrar na sala
+                socket.join(room); 
                 console.log(`Usuário ${socket.id} entrou na sala: ${room}`);
             });
 
@@ -64,7 +66,7 @@ class App {
             // Evento para o envio de mensagens nas salas
             socket.on('message', ({ room, text, sender }) => {
                 console.log(`Mensagem na sala ${room}: ${text} de ${sender}`);
-                this.io.to(room).emit('message', { room, text, sender }); // Emite a mensagem para todos os usuários da sala
+                this.io.to(room).emit('message', { room, text, sender }); 
             });
 
             // Evento para quando o usuário se desconectar
